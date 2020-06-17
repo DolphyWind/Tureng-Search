@@ -5,21 +5,52 @@ import sys
 
 captionFont = QtGui.QFont('Bebas Neue', 28)
 itemFont = QtGui.QFont('Century Gothic', 14)
+miniFont = QtGui.QFont('Century Gothic', 12)
+xminiFont = QtGui.QFont('Century Gothic', 10)
 
 class Window(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.language_dict = {'English': 'en', 'Turkish': 'tr', 'Français': 'fr', 'Español': 'es', 'Deutsch': 'de'}
+        self.language_dict = {'English': 'en', 'Türkçe': 'tr', 'Français': 'fr', 'Español': 'es', 'Deutsch': 'de'}
         self.setWindowTitle("Tureng search")
         self.setGeometry(0, 0, 800, 600)
         self.setMinimumSize(750, 550)
         self.tabledata = list()
         self.center()
 
+        # Some strings
+        self.pleaseTypeSomethingText = "Please type something in search bar"
+        self.errorText = "Error!"
+        self.wordNotFoundText = "Word not found: "
+
+        # Translations might not be label
+        self.translationsMightNotBe = QtWidgets.QLabel("Language translations might not be 100% accurate")
+        self.translationsMightNotBe.setFont(xminiFont)
+
+        # Language Translations Layout
+        self.langTranslationLayout = QtWidgets.QHBoxLayout()
+        self.langTranslationLayout.addWidget(self.translationsMightNotBe)
+        self.langTranslationLayout.addStretch(3)
+
         # Header Text
         self.header = QtWidgets.QLabel("Tureng Search")
         self.header.setFont(captionFont)
         self.header.setAlignment(QtCore.Qt.AlignCenter)
+
+        # Translate between and app language button
+        self.translateBetween = QtWidgets.QLabel("Translate Between:")
+        self.translateBetween.setFont(miniFont)
+
+        self.appLanguage = QtWidgets.QLabel("App Language")
+        self.appLanguage.setFont(miniFont)
+
+        # Label's layout
+        self.labelLayout = QtWidgets.QHBoxLayout()
+        self.labelLayout.addStretch()
+        self.labelLayout.addWidget(self.translateBetween)
+        self.labelLayout.addStretch(3)
+        self.labelLayout.addWidget(self.appLanguage)
+        self.labelLayout.addStretch()
 
         # Language Combo box
         self.langCB = QtWidgets.QComboBox()
@@ -29,14 +60,14 @@ class Window(QtWidgets.QWidget):
         self.langCB.activated.connect(self.getLanguagePairs)
 
         # Search Box
-        self.searchBox = QtWidgets.QLineEdit()
-        self.searchBox.setPlaceholderText("Search in Tureng...")
-        self.searchBox.setFont(itemFont)
-        self.searchBox.setMinimumWidth(350)
+        self.searchBar = QtWidgets.QLineEdit()
+        self.searchBar.setPlaceholderText("Search in Tureng...")
+        self.searchBar.setFont(itemFont)
+        self.searchBar.setMinimumWidth(350)
+        self.searchBar.returnPressed.connect(self.search)
 
         # TranslationBox
         self.pairCBox = QtWidgets.QComboBox()
-        self.getLanguagePairs()
         self.pairCBox.setFont(itemFont)
         self.pairCBox.setMinimumWidth(180)
 
@@ -50,7 +81,7 @@ class Window(QtWidgets.QWidget):
         self.searchHLayout = QtWidgets.QHBoxLayout()
 
         self.searchHLayout.addWidget(self.pairCBox)
-        self.searchHLayout.addWidget(self.searchBox)
+        self.searchHLayout.addWidget(self.searchBar)
         self.searchHLayout.addWidget(self.langCB)
 
         # Search button layout
@@ -69,11 +100,13 @@ class Window(QtWidgets.QWidget):
         self.mainVLayout = QtWidgets.QVBoxLayout()
         self.mainVLayout.addWidget(self.header)
         self.mainVLayout.addStretch()
+        self.mainVLayout.addLayout(self.labelLayout)
         self.mainVLayout.addLayout(self.searchHLayout)
         self.mainVLayout.addLayout(self.buttonHLayout)
         self.mainVLayout.addStretch()
         self.mainVLayout.addWidget(self.resultTable)
         self.mainVLayout.addStretch()
+        self.mainVLayout.addLayout(self.langTranslationLayout)
 
         self.mainHLayout = QtWidgets.QHBoxLayout()
         self.mainHLayout.addStretch()
@@ -81,6 +114,7 @@ class Window(QtWidgets.QWidget):
         self.mainHLayout.addStretch()
 
         self.setLayout(self.mainHLayout)
+        self.getLanguagePairs()
         self.show()
 
     def getLanguagePairs(self):
@@ -89,14 +123,54 @@ class Window(QtWidgets.QWidget):
         my_list = list()
         if lang == 'en':
             my_list = ['Turkish - English', 'German - English', 'French - English', 'Spanish - English']
+            self.header.setText("Tureng Search")
+            self.appLanguage.setText("App Language")
+            self.translateBetween.setText("Translate Between:")
+            self.searchBar.setPlaceholderText("Search in Tureng...")
+            self.pleaseTypeSomethingText = "Please type something in search bar"
+            self.errorText = "Error!"
+            self.wordNotFoundText = "Word not found: "
+            self.searchButton.setText("Search")
         elif lang == 'tr':
             my_list = ['Türkçe - İngilizce', 'Almanca - İngilizce', 'Fransızca - İngilizce', 'İspanyolca - İngilizce']
+            self.header.setText("Tureng Arama")
+            self.appLanguage.setText("Uygulama Dili")
+            self.translateBetween.setText("Şu diller arasında çevir:")
+            self.searchBar.setPlaceholderText("Tureng'de ara...")
+            self.pleaseTypeSomethingText = "Lütfen arama çubuğuna bir şeyler giriniz"
+            self.errorText = "Hata!"
+            self.wordNotFoundText = "Kelime bulunamadı: "
+            self.searchButton.setText("Ara")
         elif lang == 'fr':
             my_list = ['Turc - Anglais', 'Allemand - Anglais', 'Français - Anglais', 'Espagnol - Anglais']
+            self.header.setText("Recherche Tureng")
+            self.appLanguage.setText("Langue de l'application")
+            self.translateBetween.setText("Traduire Entre:")
+            self.searchBar.setPlaceholderText("Rechercher à Tureng...")
+            self.pleaseTypeSomethingText = "Veuillez taper quelque chose dans la barre de recherche"
+            self.errorText = "Erreur!"
+            self.wordNotFoundText = "Mot introuvable: "
+            self.searchButton.setText("Chercher")
         elif lang == 'es':
             my_list = ['Turco - Inglés', 'Alemán - Inglés', 'Francés - Inglés', 'Español - Inglés']
+            self.header.setText("Búsqueda Tureng")
+            self.appLanguage.setText("Idioma de la Aplicación")
+            self.translateBetween.setText("Traducir Entre:")
+            self.searchBar.setPlaceholderText("Buscar en Tureng...")
+            self.pleaseTypeSomethingText = "Escribe algo en la barra de búsqueda"
+            self.errorText = "Error!"
+            self.wordNotFoundText = "Palabra no encontrada: "
+            self.searchButton.setText("Buscar")
         elif lang == 'de':
             my_list = ['Türkisch - Englisch', 'Deutsch - Englisch', 'Französisch - Englisch', 'Spanisch - Englisch']
+            self.header.setText("Tureng Suche")
+            self.appLanguage.setText("App-Sprache")
+            self.translateBetween.setText("Übersetzen Zwischen:")
+            self.searchBar.setPlaceholderText("Suche in Tureng...")
+            self.pleaseTypeSomethingText = "Bitte geben Sie etwas in die Suchleiste ein"
+            self.errorText = "Error!"
+            self.wordNotFoundText = "Wort nicht gefunden: "
+            self.searchButton.setText("Suche")
 
         self.pairCBox.addItems(my_list)
 
@@ -113,9 +187,9 @@ class Window(QtWidgets.QWidget):
             replace('ı', 'i')
         if translate_between == 'aleman-ingles':
             translate_between = 'germano-ingles'
-        word_to_search = self.searchBox.text().lower().strip()
+        word_to_search = self.searchBar.text().lower().strip()
         if len(word_to_search.replace(' ', '')) == 0:
-            QtWidgets.QMessageBox.critical(self, "Error!", "Please type something in search bar",  QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.critical(self, self.errorText, self.pleaseTypeSomethingText,  QtWidgets.QMessageBox.Ok)
             return
 
         link = "https://tureng.com/{}/{}/{}".format(language, translate_between, word_to_search)
@@ -124,7 +198,7 @@ class Window(QtWidgets.QWidget):
             self.tabledata = self.getData(link)
             self.createTable()
         except:
-            QtWidgets.QMessageBox.critical(self, "Error!", "Couldn't find word: '{}'".format(word_to_search), QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.critical(self, self.errorText, self.wordNotFoundText + word_to_search, QtWidgets.QMessageBox.Ok)
             return
     def getData(self, url): # geting data
         r = requests.get(url)
