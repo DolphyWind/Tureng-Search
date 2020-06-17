@@ -95,6 +95,7 @@ class Window(QtWidgets.QWidget):
         self.resultTable.setRowCount(0)
         self.resultTable.setColumnCount(0)
         self.resultTable.setMinimumSize(600, 300)
+        self.resultTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
         # Main Layout
         self.mainVLayout = QtWidgets.QVBoxLayout()
